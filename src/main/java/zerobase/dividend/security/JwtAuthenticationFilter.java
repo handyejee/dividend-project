@@ -35,8 +35,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String token = this.resolveTokenFromRequest(request);
 
         if (StringUtils.hasText(token) && this.tokenProvider.validateToken(token)) {
+
+            try {
             Authentication auth = this.tokenProvider.getAuthentication(token);
             SecurityContextHolder.getContext().setAuthentication(auth);
+
+            log.info(String.format("[%s] -> %s", this.tokenProvider.getUsername(token), request.getRequestURI()));
+
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }else {
+            log.debug("No valid JWT token found in request");
         }
 
         filterChain.doFilter(request, response);

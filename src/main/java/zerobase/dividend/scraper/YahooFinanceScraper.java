@@ -1,5 +1,6 @@
 package zerobase.dividend.scraper;
 
+import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -16,6 +17,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 @Component
 public class YahooFinanceScraper implements Scraper{
 
@@ -34,7 +36,7 @@ public class YahooFinanceScraper implements Scraper{
             long now = System.currentTimeMillis() / 1000; //초 단위로 바꿈
 
             String url = String.format(STATISTICS_URL, company.getTicker(), START_TIME, now);
-            System.out.println("url " + url);
+            log.info("URL {}", url);
             Connection connection = Jsoup.connect(url)
                     .ignoreHttpErrors(true)
                     .ignoreContentType(true)
@@ -73,7 +75,7 @@ public class YahooFinanceScraper implements Scraper{
                 scrapResult.setDividends(dividends);
 
             } else {
-                System.out.println("No table found with the specified class.");
+                log.info("No table found with the specified class.");
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -87,14 +89,12 @@ public class YahooFinanceScraper implements Scraper{
 
         try {
             Document document = Jsoup.connect(url).get();
-            System.out.println(url);
             Element titleEle = document.getElementsByTag("h1").get(1);
-            System.out.println(titleEle);
 
             String fullTitle = titleEle.text();
             String title = fullTitle.split(" \\(")[0];
 
-            System.out.println("Company Name: " + title);
+            log.info("Scrapped Company Name: {}", title);
 
             return new Company(ticker, title);
 
